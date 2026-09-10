@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Home Automation Simulator - Final Defence</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'neutral',
+      securityLevel: 'loose',
+      fontFamily: 'sans-serif'
+    });
+  </script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #0f172a;
+      color: #1e293b;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .deck-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .slide {
+      display: none;
+      width: 100%;
+      max-width: 1250px;
+      height: 88vh;
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 34px 46px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+      overflow-y: auto;
+    }
+    .slide.active {
+      display: flex;
+      flex-direction: column;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.99); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* Large 20px+ Typography for Visibility */
+    h1 {
+      font-size: 36px;
+      color: #1e3a8a;
+      margin-bottom: 14px;
+      border-bottom: 3px solid #2563eb;
+      padding-bottom: 8px;
+    }
+    h2 {
+      font-size: 26px;
+      color: #1d4ed8;
+      margin: 14px 0 6px 0;
+    }
+    h3 {
+      font-size: 22px;
+      color: #2563eb;
+      margin-bottom: 6px;
+    }
+    p, li, td, th {
+      font-size: 20px;
+      line-height: 1.55;
+    }
+    ul, ol {
+      margin-left: 28px;
+      margin-bottom: 10px;
+    }
+    li {
+      margin-bottom: 6px;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 20px;
+    }
+    th, td {
+      border: 1px solid #cbd5e1;
+      padding: 10px 14px;
+      text-align: left;
+    }
+    th {
+      background-color: #f1f5f9;
+      color: #0f172a;
+    }
+    tr:nth-child(even) {
+      background-color: #f8fafc;
+    }
+
+    /* Code Blocks */
+    pre:not(.mermaid) {
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 14px 18px;
+      border-radius: 8px;
+      font-size: 19px;
+      font-family: Consolas, "Courier New", monospace;
+      overflow-x: auto;
+      margin: 10px 0;
+    }
+    code {
+      font-family: Consolas, "Courier New", monospace;
+      background: #e2e8f0;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 19px;
+    }
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: #38bdf8;
+    }
+
+    /* Mermaid diagrams container */
+    .mermaid {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 14px;
+      margin: 12px 0;
+      text-align: center;
+      font-size: 18px !important;
+    }
+
+    /* Callouts & Badges */
+    .callout {
+      background: #eff6ff;
+      border-left: 6px solid #2563eb;
+      padding: 14px 18px;
+      border-radius: 0 8px 8px 0;
+      margin: 12px 0;
+      font-size: 20px;
+    }
+    .badge-done {
+      color: #16a34a;
+      font-weight: bold;
+    }
+
+    /* Navigation Bar */
+    .nav-bar {
+      height: 55px;
+      background: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      border-top: 1px solid #334155;
+    }
+    .nav-info {
+      color: #94a3b8;
+      font-size: 18px;
+      font-weight: 500;
+    }
+    .nav-buttons {
+      display: flex;
+      gap: 12px;
+    }
+    .btn {
+      background: #2563eb;
+      color: #ffffff;
+      border: none;
+      padding: 7px 18px;
+      border-radius: 6px;
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn:hover {
+      background: #1d4ed8;
+    }
+    .btn:disabled {
+      background: #475569;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="deck-container">
+
+    <!-- SLIDE 1: System Overview & Architecture -->
+    <div class="slide active" id="slide-1">
+      <h1>Slide 1: System Overview &amp; Architecture</h1>
+      
+      <div class="mermaid">
+graph LR
+    React["1. React 19 Dashboard<br/>(Port 5173)"] <-->|REST / JSON| Spring["2. Spring Boot Backend<br/>(Port 8080)"]
+    ESP["4. ESP32 Hardware<br/>(Own Wi-Fi IP)"] <-->|REST / Plain Text| Spring
+    Spring <-->|Spring Data JPA / SQL| PG[("3. PostgreSQL 18<br/>'smarthome' DB (Port 5432)")]
+    ESP --> GPIO["Physical Blue LED<br/>(GPIO Pin 2)"]
+      </div>
+
+      <div class="callout">
+        <h3>Port Allocation &amp; Networking Architecture (Key Concept)</h3>
+        <p><strong>Host Machine (Single IP: 192.168.1.73)</strong>: Runs three independent server services sharing one network interface, requiring distinct port numbers for traffic routing:</p>
+        <ul style="margin-top: 6px;">
+          <li><strong>React Dashboard</strong>: Port <code>5173</code></li>
+          <li><strong>Spring Boot REST API</strong>: Port <code>8080</code></li>
+          <li><strong>PostgreSQL Database</strong>: Port <code>5432</code></li>
+        </ul>
+        <p style="margin-top: 8px;"><strong>ESP32 Node (Independent IP)</strong>: An autonomous hardware client with its own separate Wi-Fi IP address. It functions as an <strong>HTTP Client</strong>—actively initiating outbound requests to Spring Boot on port 8080 rather than hosting an internal server.</p>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: Purpose: Simulator to Live Deployment -->
+    <div class="slide" id="slide-2">
+      <h1>Slide 2: Project Purpose: Simulator to Live Deployment</h1>
+      
+      <h2>The Core Concept:</h2>
+      <ul>
+        <li><strong>Smart Home + Automation Simulator:</strong> Acts as a complete Smart Home System, and also functions as a <strong>Simulator</strong> to safely test and validate switching logic and automation workflows locally <em>before</em> deploying to real, high-voltage house wiring.</li>
+        <li><strong>Local-to-Live Roadmap:</strong>
+          <ul>
+            <li><strong>Current Stage (Local Testing &amp; Simulation):</strong> Verifying the full pipeline locally using our laptop server, local PostgreSQL database, and ESP32 LED output.</li>
+            <li><strong>Final Intention (Going Live):</strong> Deploying the Spring Boot backend to a live cloud server, connecting multi-channel relay shields, and controlling real 220V physical home appliances.</li>
+          </ul>
+        </li>
+      </ul>
+
+      <h2 style="margin-top: 18px;">What We Planned vs. What We Built:</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Mid-Defense Target</th>
+            <th>Status</th>
+            <th>Delivered Implementation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>1. Web Dashboard</strong></td>
+            <td><span class="badge-done">Done</span></td>
+            <td>React UI to simulate and control switches in real time.</td>
+          </tr>
+          <tr>
+            <td><strong>2. Java Backend</strong></td>
+            <td><span class="badge-done">Done</span></td>
+            <td>Spring Boot server managing APIs, logic, and hardware routing.</td>
+          </tr>
+          <tr>
+            <td><strong>3. Database</strong></td>
+            <td><span class="badge-done">Done</span></td>
+            <td>PostgreSQL database storing device states safely for local testing &amp; live scaling.</td>
+          </tr>
+          <tr>
+            <td><strong>4. Hardware Node</strong></td>
+            <td><span class="badge-done">Done</span></td>
+            <td>ESP32 board simulating appliance actuation on GPIO 2 before high-voltage wiring.</td>
+          </tr>
+          <tr>
+            <td><strong>5. Live Status Check</strong></td>
+            <td><span class="badge-done">Done</span></td>
+            <td>Automated heartbeat detecting whether the device is Online or Offline.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SLIDE 3: Core REST APIs -->
+    <div class="slide" id="slide-3">
+      <h1>Slide 3: Core REST APIs (The Communication Hub)</h1>
+      <p>The Spring Boot backend exposes dual-purpose REST endpoints designed for two distinct clients:</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Route</th>
+            <th>Request Body</th>
+            <th>Response Format</th>
+            <th>Caller</th>
+            <th>Purpose &amp; Rationale</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>GET</strong></td>
+            <td><code>/api/devices</code></td>
+            <td><em>None</em></td>
+            <td>JSON Array</td>
+            <td><strong>React</strong></td>
+            <td>Fetches full device state for dashboard rendering.</td>
+          </tr>
+          <tr>
+            <td><strong>POST</strong></td>
+            <td><code>/api/devices/{id}/toggle</code></td>
+            <td><em>None</em></td>
+            <td>JSON Object</td>
+            <td><strong>React</strong></td>
+            <td>Flips device power state (ON/OFF) and updates PostgreSQL.</td>
+          </tr>
+          <tr>
+            <td><strong>GET</strong></td>
+            <td><code>/api/devices/{id}/state</code></td>
+            <td><em>None</em></td>
+            <td><strong>Plain Text</strong> (<code>"ON"</code> / <code>"OFF"</code>)</td>
+            <td><strong>ESP32</strong></td>
+            <td><strong>RAM-Optimized</strong>: Raw text avoids JSON parsing on the microcontroller.</td>
+          </tr>
+          <tr>
+            <td><strong>POST</strong></td>
+            <td><code>/api/devices/{id}/heartbeat</code></td>
+            <td><em>None</em></td>
+            <td><code>{ "status": "success" }</code></td>
+            <td><strong>ESP32</strong></td>
+            <td>Liveness probe: Records current timestamp in PostgreSQL.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SLIDE 4: Flow 1: Web Dashboard ➔ Backend ➔ Database -->
+    <div class="slide" id="slide-4">
+      <h1>Slide 4: Flow 1: Web Dashboard ➔ Backend ➔ Database</h1>
+      <p>When a user toggles an appliance on the web dashboard:</p>
+
+      <div class="mermaid">
+sequenceDiagram
+    autonumber
+    actor User as User
+    participant React as React (Browser)
+    participant Spring as Spring Boot (Port 8080)
+    participant PG as PostgreSQL (Port 5432)
+
+    User->>React: Clicks "Turn On"
+    React->>Spring: POST /api/devices/1/toggle
+    Note over Spring: DeviceController receives request<br/>Calls DeviceService.toggleDevice(1)
+    Spring->>PG: UPDATE devices SET is_on = true WHERE id = 1
+    PG-->>Spring: Database updated (is_on = 't')
+    Spring-->>React: HTTP 200 OK { "id": 1, "isOn": true, ... }
+    React-->>User: Button changes to "Turn Off" & badge to "ON"
+      </div>
+
+      <div class="callout">
+        <strong>Key Technical Point:</strong> The React frontend never connects to PostgreSQL directly. Spring Boot acts as the secure mediator, validating the request and executing the update via Spring Data JPA.
+      </div>
+    </div>
+
+    <!-- SLIDE 5: Hardware Execution & Online Status (Part A & Part B) -->
+    <div class="slide" id="slide-5">
+      <h1>Slide 5: Hardware Interaction — Action Execution &amp; Online Status</h1>
+
+      <h2>Part A: How Clicking the Button Turns on the LED (Action Execution)</h2>
+      <div class="mermaid">
+sequenceDiagram
+    autonumber
+    actor User as User
+    participant React as 1. React Button
+    participant Spring as 2. Spring Boot
+    participant PG as 3. PostgreSQL
+    participant ESP as 4. ESP32 (Polls every 1s)
+    participant GPIO as Physical GPIO 2 (LED)
+
+    User->>React: Clicks "Turn On"
+    React->>Spring: POST /api/devices/1/toggle
+    Spring->>PG: Sets is_on = true in database ('f' becomes 't')
+    PG-->>Spring: Updated
+
+    Note over ESP: Within 1 second, polling timer fires
+    ESP->>Spring: GET /api/devices/1/state
+    Spring-->>ESP: HTTP 200 "ON"
+    ESP->>GPIO: digitalWrite(2, HIGH) -> 3.3V sent to pin
+    Note over GPIO: Blue LED Physically Turns ON!
+      </div>
+
+      <h2 style="margin-top: 18px;">Part B: How the ESP32 Relays its "Online" Status to React (Liveness Tracking)</h2>
+      <div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant ESP as 1. ESP32 (Hardware)
+    participant Spring as 2. Spring Boot Backend
+    participant PG as 3. PostgreSQL Database
+    participant React as 4. React Web Dashboard
+
+    Note over ESP: Every 5 Seconds
+    ESP->>Spring: POST /api/devices/1/heartbeat
+    Spring->>PG: UPDATE devices SET last_heartbeat = NOW()
+    Spring-->>ESP: 200 OK {"status": "success"}
+
+    Note over React: Every 3 Seconds
+    React->>Spring: GET /api/devices
+    Note over Spring: Evaluates: isOnline = (NOW - last_heartbeat < 15s)
+    Spring-->>React: HTTP 200 [ { ..., "online": true } ]
+    React-->>React: Displays green "● Online" badge on screen!
+      </div>
+    </div>
+
+    <!-- SLIDE 6: Java Backend Logic -->
+    <div class="slide" id="slide-6">
+      <h1>Slide 6: Key Java Backend Code &amp; Business Logic</h1>
+      <h2>1. REST Controller (<code>DeviceController.java</code>)</h2>
+      <pre><code>@RestController
+@RequestMapping("/api/devices")
+public class DeviceController {
+    private final DeviceService deviceService;
+
+    // Constructor Injection (Spring IoC / DI)
+    public DeviceController(DeviceService deviceService) {
+        this.deviceService = deviceService;
+    }
+
+    @PostMapping("/{id}/toggle")
+    public ResponseEntity&lt;Device&gt; toggle(@PathVariable Long id) {
+        return deviceService.toggleDevice(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/{id}/state") // Plain text for ESP32
+    public ResponseEntity&lt;String&gt; getStateRaw(@PathVariable Long id) {
+        return deviceService.getDeviceById(id)
+                .map(d -&gt; ResponseEntity.ok(d.getIsOn() ? "ON" : "OFF"))
+                .orElse(ResponseEntity.notFound().build());
+    }
+}</code></pre>
+
+      <h2>2. Dynamic Liveness Property (<code>Device.java</code>)</h2>
+      <pre><code>@JsonProperty("online")
+public boolean isOnline() {
+    if (lastHeartbeat == null) return false;
+    // Evaluated dynamically at serialization time:
+    return Instant.now().minusSeconds(15).isBefore(lastHeartbeat);
+}</code></pre>
+    </div>
+
+    <!-- SLIDE 7: Database Storage -->
+    <div class="slide" id="slide-7">
+      <h1>Slide 7: Database Storage (PostgreSQL 18)</h1>
+      <h2>The <code>devices</code> Relational Table:</h2>
+      <pre><code> id | is_on |          last_heartbeat          |       name        |  type  
+----+-------+----------------------------------+-------------------+--------
+  1 | t     | 2026-09-09 13:25:33.964334+05:45 | Living Room Light | Switch</code></pre>
+
+      <h2>Key Technical Highlights:</h2>
+      <ul>
+        <li><strong>Data Fields</strong>:
+          <ul>
+            <li><code>id</code>: Auto-generated primary key.</li>
+            <li><code>is_on</code>: Boolean (<code>t</code> = ON, <code>f</code> = OFF).</li>
+            <li><code>last_heartbeat</code>: Timestamp of the last received hardware ping.</li>
+          </ul>
+        </li>
+        <li><strong>Spring Data JPA</strong>: Interface <code>DeviceRepository extends JpaRepository&lt;Device, Long&gt;</code> automatically provides all CRUD methods without boilerplate SQL code.</li>
+        <li><strong>Data Durability</strong>: Device states survive server and laptop restarts.</li>
+      </ul>
+    </div>
+
+    <!-- SLIDE 8: Live Demo & Future Improvements -->
+    <div class="slide" id="slide-8">
+      <h1>Slide 8: Live Demonstration &amp; Future Improvements</h1>
+      
+      <h2>System Initialization Commands (Live Demo Cheat-Sheet):</h2>
+      <ul>
+        <li><strong>One-Click Launcher</strong>: Double-click <code>start-demo.bat</code> (launches both Backend &amp; Frontend in separate windows).</li>
+        <li><strong>Start Backend</strong>: <code>cd backend &amp;&amp; .\mvnw.cmd spring-boot:run</code> <em>(Port 8080)</em></li>
+        <li><strong>Start Frontend</strong>: <code>npm run dev</code> <em>(Port 5173)</em></li>
+        <li><strong>Database Check</strong>: <code>Get-Service *postgres*</code> <em>(Runs automatically as service on Port 5432)</em></li>
+        <li><strong>Free Port 8080 (If busy)</strong>: <code>Stop-Process -Name java -Force</code></li>
+      </ul>
+
+      <h2 style="margin-top: 14px;">Live Demonstration Protocol:</h2>
+      <ol>
+        <li><strong>Verify Online Status</strong>: Open dashboard (<code>http://localhost:5173</code>) showing device marked <strong>● Online</strong>.</li>
+        <li><strong>Toggle Power State</strong>:
+          <ul>
+            <li>Click "Turn On" ➔ Button updates to "Turn Off".</li>
+            <li>PostgreSQL table updates <code>is_on</code> from <code>f</code> to <code>t</code>.</li>
+            <li>ESP32 receives <code>"ON"</code> and physical blue LED lights up.</li>
+          </ul>
+        </li>
+        <li><strong>Simulate Disconnection</strong>: Unplug ESP32 ➔ Wait 15 seconds ➔ Dashboard badge automatically changes to <strong>○ Offline</strong>.</li>
+      </ol>
+
+      <h2 style="margin-top: 14px;">Future Improvements:</h2>
+      <ul>
+        <li><strong>Relay Module</strong>: Connect an AC relay module to control real 220V wall lights and fans.</li>
+        <li><strong>Sensors</strong>: Add DHT11 sensor for live room temperature and humidity monitoring.</li>
+        <li><strong>MQTT / WebSockets</strong>: Replace HTTP polling with real-time bidirectional push messaging.</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM CONTROLS -->
+  <div class="nav-bar">
+    <div class="nav-info">
+      Slide <span id="current-slide">1</span> of <span id="total-slides">8</span> &nbsp;|&nbsp; <em>Use ← / → keys or buttons to navigate</em>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn" id="prev-btn" onclick="prevSlide()" disabled>← Previous</button>
+      <button class="btn" id="next-btn" onclick="nextSlide()">Next →</button>
+    </div>
+  </div>
+
+  <script>
+    let currentSlide = 1;
+    const totalSlides = 8;
+
+    function showSlide(n) {
+      document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+      const target = document.getElementById('slide-' + n);
+      if (target) target.classList.add('active');
+      
+      document.getElementById('current-slide').textContent = n;
+      document.getElementById('prev-btn').disabled = (n === 1);
+      document.getElementById('next-btn').disabled = (n === totalSlides);
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides) {
+        currentSlide++;
+        showSlide(currentSlide);
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) {
+        currentSlide--;
+        showSlide(currentSlide);
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'Space') nextSlide();
+      if (e.key === 'ArrowLeft') prevSlide();
+    });
+  </script>
+</body>
+</html>
