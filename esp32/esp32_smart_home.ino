@@ -8,7 +8,7 @@ const char* WIFI_PASSWORD = "YOUR_WIFI_PASSWORD";
 
 // ================= BACKEND CONFIGURATION =================
 // Replace with your laptop's local Wi-Fi IP address on Port 8080
-const char* BACKEND_BASE_URL = "http://192.168.1.73:8080/api/devices/1";
+const char* BACKEND_BASE_URL = "http://10.27.196.2:8080/api/devices/1";
 
 // Pin Configuration:
 // GPIO 2 is the built-in Blue LED on ESP32 DevKit v1
