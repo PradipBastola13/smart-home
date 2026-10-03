@@ -16,6 +16,13 @@ function Sidebar({ setPage }) {
         Devices
       </button>
 
+      <button
+        onClick={() => setPage("add-device")}
+        className="block w-full text-left p-3 hover:bg-gray-100"
+      >
+        Add Device
+      </button>
+
     </aside>
   );
 }
